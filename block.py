@@ -32,7 +32,7 @@ def program():
         if(tokenType == "idtk"):
             block()
         else:
-            print("Syntax Error line: " + str(line) + "\nProgram name expected")
+            print("Syntax Error line: " + str(line) + "\nProgram name expected ")
             exit()
     else:
         print ("Syntax Error line: " + str(line)+ "\nThe keyword ' program' expected")
