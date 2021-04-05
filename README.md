@@ -7,12 +7,12 @@ Cimple is a simple educational programming language based on C.
 
 This language supports popular programming commands and functions like:
 
-While 			If - Else 
-
-Switchcase  		Return 
-
-Print 			Input 
-
+While 			
+If - Else 
+Switchcase
+Return 
+Print 
+Input 
 Call 
 
 Αlso includes the new commands :
@@ -24,11 +24,8 @@ and declaration of nested functions(Not supported by C).
 However Cimple does not support basic programming tools like:
 
 For loops 
-
 Strings 
-
 Real numbers
-
 Arrays
 
 
