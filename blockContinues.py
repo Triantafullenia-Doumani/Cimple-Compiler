@@ -8,7 +8,13 @@ def main(argv):
     global tokenString
     global charType
     global char_buffer
+    global next_quad_number
+    global quad_list
+    global temp_counter
 
+    temp_counter = 0
+    quad_list = []
+    next_quad_number = 0
     charType = ''
     tokenType = ''
     tokenString = ''
@@ -23,7 +29,50 @@ def main(argv):
     else:
         input = open(argv[0], "r")
     program()
+###################################### INTERMEDIATE CODE #########################################
 
+# returns the number of the next quad
+def nextquad():
+    global next_quad_number
+    next_quad_number += 1
+    return next_quad_number
+
+# generates the new quand
+def genquad(op, x, y, z):
+
+    new_quad = [next_quad_number , op , x , y , z]
+    #quad_list.append(new_quad)
+    return new_quad
+
+
+# creates and returns a new temporary variable
+# the temporary changes are of the form T_1, T_2, T_3 ...
+def newtemp():
+
+    temp_counter += 1 # na thhmithw otan kleinei ena block na to mhdenizw
+    new_temp = 'T_%s' % temp_counter
+    return new_temp
+
+
+# creates a blank list of labels
+def emptylist():
+    new_quad = [next_quad_number , "_" , "_" , "_" , "_"]
+    #quad_list.append(new_quad)
+    return new_quad
+
+# creates a list of labels containing only x
+def makelist(x):
+    new_quad = [next_quad_number , "_" , x , "_" , "_"]
+
+# creates a list of labels from the merge of list 1 and list 2
+#def merge(list 1 , list 2 )
+
+# the list consists of indices in quads whose last end is not is completed
+# The backpatch visits these quads one by one and completes them with the z tag
+#def backpatch(list,z):
+
+
+###################################### GRAMMAR ANALYSIS #########################################
 def program():
     global tokenType
     lex()
@@ -47,7 +96,7 @@ def block():
         statements()
         if(tokenString == "}"):
             lex()
-    print("\nSTATEMENTS PASS\nexit with : " + tokenString)
+
 
 def declarations():
 
@@ -95,6 +144,7 @@ def subprograms():
 # 1 or more statements
 def statements():
 
+#    genquad("begin_block",name,"_","_")
     if(tokenType == "BracesOpentk"):
         lex()
         while(1):
@@ -111,7 +161,8 @@ def statements():
     else:
         statem = tokenString
         statement()
-        print("VGAINW APO STATEMENTS: " + tokenString)
+
+
 
 
 #one statement
@@ -238,6 +289,7 @@ def whileStat():
     if(tokenType == "ParenthesesOpentk"):
         lex()
         condition()
+        lex()
         if(tokenType != "ParenthesesClosetk"):
             print("Syntax Error in line: " + str(line) + "\nExpected ')'' to close the expression in WhileStat() not "+tokenString)
             exit()
@@ -553,6 +605,7 @@ def REL_OP():
         lex()
     elif(tokenType == "lesstk"):
         lex()
+        print(tokenString)
         if(tokenType == "greatertk" or tokenString == "="):
             lex()
     elif(tokenType == "greatertk"):
@@ -562,6 +615,8 @@ def REL_OP():
     else:
         print("Syntax Error in line: " + str(line) + "\nYou must have REL_OP between expressions in boolfactor() not "+tokenType)
         exit()
+
+###################################### LEXICAL ANALYSIS #########################################
 
 def newSymbol():
     global char
@@ -793,7 +848,7 @@ def find_char_type(c):
 ID_words= ["program","if","switchcase","not","function","input","declare",
             "else","forcase","and","procedure","print","while","incase","or",
             "call","case", "default","return","in","inout"]
-single_tokens_list = [",",";","+","-","*","/",")","(","[","]","{","}",">","<"]
+single_tokens_list = [",",";","+","-","*","/",")","(","[","]","{","}",">","<","="]
 auto = [
 [4,3,5,5,5,2,5,5,5,5,5,5,5,0,7,8,5,5,5],
 [1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,6,1],
