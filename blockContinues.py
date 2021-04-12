@@ -11,9 +11,11 @@ def main(argv):
     global next_quad_number
     global quad_list
     global temp_counter
+    global pointers_list
 
     temp_counter = 0
     quad_list = []
+    pointers_list = []
     next_quad_number = 0
     charType = ''
     tokenType = ''
@@ -40,8 +42,11 @@ def nextquad():
 # generates the new quand
 def genquad(op, x, y, z):
 
-    new_quad = [next_quad_number , op , x , y , z]
-    #quad_list.append(new_quad)
+    label = nextquad()
+    new_quad = [label, op , x , y , z]
+    if( z == "_"):
+        pointers_list.append(label)
+    quad_list.append(new_quad)
     return new_quad
 
 
@@ -49,36 +54,46 @@ def genquad(op, x, y, z):
 # the temporary changes are of the form T_1, T_2, T_3 ...
 def newtemp():
 
-    temp_counter += 1 # na thhmithw otan kleinei ena block na to mhdenizw
+    global temp_counter
+
+     # na thhmithw otan kleinei ena block na to mhdenizw
     new_temp = 'T_%s' % temp_counter
+    temp_counter += 1
     return new_temp
 
 
 # creates a blank list of labels
 def emptylist():
     new_quad = [next_quad_number , "_" , "_" , "_" , "_"]
+    pointers_list.append(next_quad_number)
     #quad_list.append(new_quad)
     return new_quad
 
 # creates a list of labels containing only x
 def makelist(x):
     new_quad = [next_quad_number , "_" , x , "_" , "_"]
+    pointers_list.append(next_quad_number)
 
 # creates a list of labels from the merge of list 1 and list 2
-#def merge(list 1 , list 2 )
+def merge(list1 , list2 ):
+    new_list = list1 + list2
+
 
 # the list consists of indices in quads whose last end is not is completed
 # The backpatch visits these quads one by one and completes them with the z tag
-#def backpatch(list,z):
+#def backpatch(pointers_list,z):
+#    for ( )
 
 
 ###################################### GRAMMAR ANALYSIS #########################################
 def program():
     global tokenType
+    global program_name
     lex()
     if(tokenString == "program"):
         lex()
         if(tokenType == "idtk"):
+            program_name = tokenString
             block()
         else:
             print("Syntax Error line: " + str(line) + "\nProgram name expected")
@@ -87,15 +102,13 @@ def program():
         print ("Syntax Error line: " + str(line)+ "\nThe keyword ' program' expected")
         exit()
 
+
 def block():
     lex()
     declarations()
     subprograms()
-    lex()
-    while(1):
-        statements()
-        if(tokenString == "}"):
-            lex()
+    print("PRIIIIIN " +tokenString)
+    statements()
 
 
 def declarations():
@@ -126,10 +139,13 @@ def declarations():
 def subprograms():
 
     while(tokenString == "function" or tokenString == "procedure"):
+
         lex()
         if(tokenType != "idtk"):
             print("Syntax Error in line: " + str(line) + "\nExpected ID not "+tokenType +" ( "+tokenString + " ) after function/procedure")
             exit()
+        function_name = tokenString
+        genquad("begin_block", function_name  , "_", "_")
         lex()
         if(tokenType != "ParenthesesOpentk"):
             print("Syntax Error in line: " + str(line) + "\nExpected to open Parentheses")
@@ -139,28 +155,35 @@ def subprograms():
             print("Syntax Error in line: " + str(line) + "\nExpected to close Parentheses")
             exit()
         block()
-
+        genquad("end_block", function_name  , "_", "_")
+        if(tokenType == "BracesOpentk"):
+            genquad("begin_block", program_name  , "_", "_")
 
 # 1 or more statements
 def statements():
-
-#    genquad("begin_block",name,"_","_")
-    if(tokenType == "BracesOpentk"):
-        lex()
-        while(1):
+    lex()
+    while(1):
+        if(tokenType == "BracesOpentk"):
+            lex()
+            while(1):
+                statem = tokenString
+                statement()
+                if(tokenType == "BracesClosetk"):
+                    lex()
+                    if(tokenType != "semicolontk"):
+                        print("Syntax Error in line: " + str(line) + "\nStatement "+statem+" must finish with semicolon not "+ tokenString)
+                        exit()
+                    break
+                else:
+                    continue
+        else:
             statem = tokenString
             statement()
-            if(tokenType == "BracesClosetk"):
-                lex()
-                if(tokenType != "semicolontk"):
-                    print("Syntax Error in line: " + str(line) + "\nStatement "+statem+" must finish with semicolon not "+ tokenString)
-                    exit()
-                break
-            else:
-                continue
-    else:
-        statem = tokenString
-        statement()
+
+        if(tokenString == "}"):
+            lex()
+            return
+
 
 
 
@@ -306,7 +329,10 @@ def whileStat():
 
 # assigment statement
 def assignStat():
+    global temp_counter
+
     print("mphka assigment me "+tokenString)
+    ID = tokenString
     lex()
     if(tokenType != "assignmenttk"):
         print("Syntax Error in line: " + str(line) + "\nWrong syntax of assigment")
@@ -316,6 +342,8 @@ def assignStat():
     if(check_statement_to_finish_with_semicolon() == 0):
         print("Syntax Error in line: " + str(line) + "\nStatement assignment must finish with semicolon not "+ tokenString)
         exit()
+    genquad(":=" , T1 , "_" , ID)
+    temp_counter = 0
 
 
 # if statement
@@ -548,17 +576,29 @@ def expression():
     print("\nvgainw expresion me "+tokenString + "\n")
 
 def term():
+
+    global T1
+
     print("mphka term me "+tokenString)
     factor()
+    T1 = T
     while(MUL_OP() == 1 or ADD_OP() == 1): #h grammatikh leei mono gia MUL alla den exei nohma
         print(tokenString)
+        op = tokenString
+        w = newtemp()
         lex()
         factor()
+        T2 = T
+        genquad(op , T1 , T2 , w)
+        T1 = w
 
 
 def factor():
+    global T
+
     print("mphka factor me "+tokenString)
-    if(tokenType == "numbertk"):  #INTEGER
+    if(tokenType == "numbertk"):
+        T = tokenString
         lex()
     elif(tokenType == "idtk"):
         idtail()
@@ -571,8 +611,10 @@ def factor():
             print("Syntax Error in line: " + str(line) + "\nWrong syntax of expresion")
             exit()
 def idtail():
+    global T
     print("mphka idtail me "+tokenString)
     if(tokenString in varlist):
+        T = tokenString
         lex()
         return
     lex()
@@ -582,6 +624,7 @@ def idtail():
             print("Syntax Error in line: " + str(line) + "\nWrong syntax of actualparlist, does not close")
             exit()
     else:
+
         pass
 # symbols + and - (are optional)
 def optional_sign():
@@ -656,7 +699,12 @@ def check_if_EOF_after_dot():
     while(char== "\n" or char == "\t" or char ==" "):
         newSymbol()
     if not char:
-        print("COMPILE SUCCESSFUL COMPLETE!" )
+        print("COMPILE SUCCESSFUL COMPLETE!\n" )
+        genquad("halt","_","_","_")
+        genquad("end_block",program_name,"_","_")
+        for x in quad_list:
+            print(str(x) + "\n")
+
         exit(1)
     else:
         print("ERROR line: "+str(line) + "\nProgram must finish with '.'")
@@ -664,8 +712,11 @@ def check_if_EOF_after_dot():
 
 def check_if_programm_ends_with_dot():
     if(char_buffer == '.'):
-        print("COMPILE SUCCESSFUL COMPLETE!" )
-
+        print("COMPILE SUCCESSFUL COMPLETE!\n" )
+        genquad("halt","_","_","_")
+        genquad("end_block",program_name,"_","_")
+        for x in quad_list:
+            print(str(x) + "\n")
         exit(1)
     else:
         print("ERROR line: "+str(line) + "\nProgram must finish with '.'")
