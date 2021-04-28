@@ -82,8 +82,6 @@ The numbers take values from –(2^32 − 1)t o (2^32 − 1).
 Language identifiers (ID) are strings consisting of letters and letters , but starting with a letter.
 ID with more than 30 characters are considered incorrect.
 
-???den eipame oti den exoume Strings??????
-
 The white characters (tab, space, return) are ignored.
 
 
