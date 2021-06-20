@@ -1,7 +1,5 @@
 ﻿
 
-| **1**
-
 **CIMPLE COMPILER**
 
 **ABOUT CIMPLE**
